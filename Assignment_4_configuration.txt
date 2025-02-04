@@ -1,0 +1,391 @@
+-------------------------------------------R1----------------------------------------
+R1:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 11.1.1.1 255.255.255.255
+ipv6 address 2607:f798:1234::1/128
+ipv6 enable
+!
+int f0/0
+ip address 24.4.0.1 255.255.252.0
+ipv6 address 2560:1234::1/48
+ipv6 enable
+no shut
+!
+int g1/0
+ip address 11.0.0.1 255.255.255.252
+ipv6 address 2607:f798:1234:0001::0/127
+ipv6 enable
+no shut
+!
+int g2/0
+ip address 11.0.0.5 255.255.255.252
+ipv6 address 2607:f798:1234:0002::0/127
+ipv6 enable 
+no shut
+!
+int g3/0
+ip address 24.4.4.1 255.255.252.0
+ipv6 address 2560:1234:4::1/48
+ipv6 enable
+no shut
+!
+router bgp 64812
+no bgp default ipv4-unicast
+neighbor 11.0.0.2 remote-as 123
+neighbor 2607:f798:1234:0001::1 remote-as 123
+neighbor 11.0.0.6 remote-as 123
+neighbor 2607:f798:1234:0002::1 remote-as 123
+!
+address-family ipv4
+neighbor 11.0.0.2 activate
+neighbor 11.0.0.2 send-community both
+neighbor 11.0.0.2 route-map secondary in
+neighbor 11.0.0.6 activate
+neighbor 11.0.0.6 send-community both
+neighbor 11.0.0.6 route-map primary in
+redistribute connected
+!
+address-family ipv6
+neighbor 2607:f798:1234:0001::1 activate
+neighbor 2607:f798:1234:0001::1 send-community both
+neighbor 2607:f798:1234:0001::1 route-map secondary in
+neighbor 2607:f798:1234:0002::1 activate
+neighbor 2607:f798:1234:0002::1 send-community both
+neighbor 2607:f798:1234:0002::1 route-map primary in
+redistribute connected
+!
+route-map primary permit 10
+set local-preference 110
+!
+route-map secondary permit 10
+set local-preference 90
+!
+end
+
+-------------------------------------------R2----------------------------------------
+R2:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 11.2.2.2 255.255.255.255
+ipv6 address 2607:f798:1234::2/128
+ipv6 enable
+!
+int g1/0
+ip address 11.0.0.2 255.255.255.252
+ipv6 address 2607:f798:1234:0001::1/127
+ipv6 enable
+no shut
+!
+int g2/0
+ip address 11.0.0.9 255.255.255.252
+ipv6 address 2607:f798:1234:0003::0/127
+ipv6 enable
+no shut
+!
+router bgp 123
+no bgp default ipv4-unicast
+neighbor 11.0.0.1 remote-as 64812
+neighbor 2607:f798:1234:0001::0 remote-as 64812
+neighbor 11.0.0.10 remote-as 123
+neighbor 2607:f798:1234:0003::1 remote-as 123
+!
+address-family ipv4
+neighbor 11.0.0.1 activate
+neighbor 11.0.0.1 send-community both
+neighbor 11.0.0.10 activate
+neighbor 11.0.0.10 next-hop-self
+!
+address-family ipv6
+neighbor 2607:f798:1234:0001::0 activate
+neighbor 2607:f798:1234:0001::0 send-community both
+neighbor 2607:f798:1234:0003::1 activate
+neighbor 2607:f798:1234:0003::1 next-hop-self
+!
+end
+
+-------------------------------------------R3----------------------------------------
+R3:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 11.3.3.3 255.255.255.255
+ipv6 address 2607:f798:1234::3/128
+ipv6 enable
+!
+int g1/0
+ip address 11.0.0.6 255.255.255.252
+ipv6 address 2607:f798:1234:0002::1/127
+ipv6 enable
+no shut
+!
+int g2/0
+ip address 11.0.0.13 255.255.255.252
+ipv6 address 2607:f798:1234:0004::0/127
+ipv6 enable
+no shut
+!
+router bgp 123
+no bgp default ipv4-unicast
+neighbor 11.0.0.5 remote-as 64812
+neighbor 2607:f798:1234:0002::0 remote-as 64812
+neighbor 11.0.0.14 remote-as 123
+neighbor 2607:f798:1234:0004::1 remote-as 123
+!
+address-family ipv4
+neighbor 11.0.0.5 activate
+neighbor 11.0.0.5 send-community both
+neighbor 11.0.0.14 activate
+neighbor 11.0.0.14 next-hop-self
+!
+address-family ipv6
+neighbor 2607:f798:1234:0002::0 activate
+neighbor 2607:f798:1234:0002::0 send-community both
+neighbor 2607:f798:1234:0004::1 activate
+neighbor 2607:f798:1234:0004::1 next-hop-self
+!
+end
+
+-------------------------------------------R4----------------------------------------
+R4:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 11.4.4.4 255.255.255.255
+ipv6 address 2607:f798:1234::4/128
+ipv6 enable
+!
+int g1/0
+ip address 11.0.0.10 255.255.255.252
+ipv6 address 2607:f798:1234:0003::1/127
+ipv6 enable
+no shut
+!
+int g2/0
+ip address 11.0.0.14 255.255.255.252
+ipv6 address 2607:f798:1234:0004::1/127
+ipv6 enable
+no shut
+!
+int g3/0
+ip address 74.165.123.5 255.255.255.252
+ipv6 address 2450:74:165:123:4::0/127
+ipv6 enable
+no shut
+!
+int g4/0
+ip address 74.165.123.9 255.255.255.252
+ipv6 address 2450:74:165:123:8::0/127
+ipv6 enable
+no shut
+!
+int g5/0
+ip address 34.171.11.17 255.255.255.252
+ipv6 address 2173:34:171:11:16::0/127
+ipv6 enable
+no shut
+!
+router bgp 123
+no bgp default ipv4-unicast
+neighbor 11.0.0.9 remote-as 123
+neighbor 2607:f798:1234:0003::0 remote-as 123
+neighbor 11.0.0.13 remote-as 123
+neighbor 2607:f798:1234:0004::0 remote-as 123
+neighbor 74.165.123.6 remote-as 179
+neighbor 2450:74:165:123:4::1 remote-as 179
+neighbor 74.165.123.10 remote-as 179
+neighbor 2450:74:165:123:8::1 remote-as 179
+neighbor 34.171.11.18 remote-as 345
+neighbor 2173:34:171:11:16::1 remote-as 345
+!
+address-family ipv4
+neighbor 11.0.0.9 activate
+neighbor 11.0.0.9 next-hop-self
+neighbor 11.0.0.13 activate
+neighbor 11.0.0.13 next-hop-self
+neighbor 74.165.123.6 activate
+neighbor 74.165.123.6 send-community both
+neighbor 74.165.123.6 remove-private-as
+neighbor 74.165.123.6 route-map bogon in
+neighbor 74.165.123.10 activate
+neighbor 74.165.123.10 send-community both
+neighbor 74.165.123.10 remove-private-as
+neighbor 74.165.123.10 route-map bogon in
+neighbor 34.171.11.18 activate
+neighbor 34.171.11.18 send-community both
+neighbor 34.171.11.18 remove-private-as
+aggregate-address 11.0.0.0 255.255.255.240 as-set summary-only
+aggregate-address 24.4.0.0 255.255.248.0 as-set summary-only
+aggregate-address 74.165.123.0 255.255.255.0 summary-only
+!
+address-family ipv6
+neighbor 2607:f798:1234:0003::0 activate
+neighbor 2607:f798:1234:0003::0 send-community both
+neighbor 2607:f798:1234:0003::0 next-hop-self
+neighbor 2607:f798:1234:0004::0 activate
+neighbor 2607:f798:1234:0004::0 send-community both
+neighbor 2607:f798:1234:0004::0 next-hop-self
+neighbor 2450:74:165:123:4::1 activate
+neighbor 2450:74:165:123:4::1 send-community both
+neighbor 2450:74:165:123:4::1 remove-private-as
+neighbor 2450:74:165:123:8::1 activate
+neighbor 2450:74:165:123:8::1 send-community both
+neighbor 2450:74:165:123:8::1 remove-private-as
+neighbor 2173:34:171:11:16::1 activate
+neighbor 2173:34:171:11:16::1 send-community both
+neighbor 2173:34:171:11:16::1 remove-private-as
+aggregate-address 2607:F798:1234::/48
+!
+ip prefix-list def_out seq 5 deny 0.0.0.0/0 le 32
+!
+ip community-list 10 permit 65333:888
+!
+route-map bogon
+match community 10
+set ip next-hop 192.168.1.1
+! 
+end
+
+-------------------------------------------R5----------------------------------------
+R5:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 74.165.123.55 255.255.255.255
+ipv6 address 2450:74:165:123:5::123/128
+ipv6 enable
+!
+int f0/0
+ip address 11.12.0.1 255.255.252.0
+ipv6 address 2433:11:12::/48
+ipv6 enable
+no shut
+!
+int g1/0
+ip address 74.165.123.6 255.255.255.252
+ipv6 address 2450:74:165:123:4::1/127
+ipv6 enable
+no shut
+!
+router bgp 179
+no bgp default ipv4-unicast
+neighbor 74.165.123.5 remote-as 123
+neighbor 2450:74:165:123:4::0 remote-as 123
+neighbor 11.12.4.1 remote-as 179
+neighbor 2433:11:12::1 remote-as 179
+!
+address-family ipv4
+neighbor 74.165.123.5 activate
+neighbor 74.165.123.5 route-map local-exchange out
+neighbor 74.165.123.5 route-map from_R5 out
+neighbor 11.12.4.1 activate
+redistribute connected
+!
+address-family ipv6
+neighbor 2450:74:165:123:4::0 activate
+neighbor 2433:11:12::1 activate
+redistribute connected
+!
+ip access-list extended 101
+permit icmp host 24.4.4.1 host 11.12.0.1
+!
+route-map local-exchange 
+set community no-export
+!
+route-map from_R5
+match ip address 101
+set as-path prepend 179
+!
+end
+
+-------------------------------------------R6----------------------------------------
+R6:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 34.171.12.123 255.255.255.255
+ipv6 address 2173:34:171:12::123/128
+ipv6 enable
+!
+int g1/0
+ip address 34.171.11.18 255.255.255.252
+ipv6 address 2173:34:171:11:16::1/127
+ipv6 enable
+no shut
+!
+router bgp 345
+no bgp default ipv4-unicast
+neighbor 34.171.11.17 remote-as 123
+neighbor 2173:34:171:11:16::0 remote-as 123
+!
+address-family ipv4
+neighbor 34.171.11.17 activate
+redistribute connected
+!
+address-family ipv6
+neighbor 2173:34:171:11:16::0 activate
+redistribute connected
+!
+end
+
+-------------------------------------------R7----------------------------------------
+R7:
+!
+ipv6 unicast-routing
+!
+int lo0
+ip address 74.165.123.7 255.255.255.255
+ipv6 address 2450:74:165:123:7::123/128
+ipv6 enable
+!
+int f0/0
+ip address 11.12.4.1 255.255.252.0
+ipv6 address 2433:11:12::1/48
+ipv6 enable
+no shut
+!
+int g1/0
+ip address 74.165.123.10 255.255.255.252
+ipv6 address 2450:74:165:123:8::1/127
+ipv6 enable
+no shut
+!
+router bgp 179
+no bgp default ipv4-unicast
+neighbor 74.165.123.9 remote-as 123
+neighbor 2450:74:165:123:8::0 remote-as 123
+neighbor 11.12.0.1 remote-as 179
+neighbor 2433:11:12:: remote-as 179
+!
+address-family ipv4
+neighbor 74.165.123.9 activate
+neighbor 74.165.123.9 route-map local-exchange out
+neighbor 74.165.123.9 route-map from_R7 out
+neighbor 11.12.0.1 activate
+redistribute connected
+!
+address-family ipv6
+neighbor 2450:74:165:123:8::0 activate
+neighbor 2433:11:12:: activate
+redistribute connected
+!
+ip access-list extended 101
+permit icmp host 24.4.0.1 host 11.12.4.1
+!
+route-map local-exchange
+set community no-export
+!
+route-map from_R7
+match ip address 101
+set as-path perpend 179
+!
+end
+
